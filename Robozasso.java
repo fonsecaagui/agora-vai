@@ -35,7 +35,16 @@ public class Robozasso extends Robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// Replace the next line with any behavior you would like
-		fire(1);
+		double angulo = inimigo.getBearing();
+		double distancia = inimigo.getDistance();
+		if ( distancia < 200 ) {
+			turnGunRight(angulo);
+			if (getGunHeat() == 0) {
+			fire(Rules.MAX_BULLET_POWER);
+			} else {
+				fire(2)
+			}
+		}
 	}
 
 	/**
