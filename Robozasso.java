@@ -16,6 +16,7 @@ public class Robozasso extends AdvancedRobot
 	/**s
 	 * run: Robozasso's default behavior
 	 */
+	int turnDirection = 1;
 	boolean stopWhenSeeRobot = false; // See goCorner()
 	public void run() {
 		// Set colors
@@ -41,56 +42,35 @@ public class Robozasso extends AdvancedRobot
 	 * onScannedRobot: What to do when you see another robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		// Should we stop, or just fire?
-		if (stopWhenSeeRobot) {
-			// Stop everything!  You can safely call stop multiple times.
-			stop();
-			// Call our custom firing method
-			smartFire(e.getDistance());
-			// Look for another robot.
-			// NOTE:  If you call scan() inside onScannedRobot, and it sees a robot,
-			// the game will interrupt the event handler and start it over
-			scan();
-			// We won't get here if we saw another robot.
-			// Okay, we didn't see another robot... start moving or turning again.
-			resume();
-		} else {
-			smartFire(e.getDistance());
-		}
+		fire(3);
 	}
-	
-	public void smartFire(double robotDistance) {
-		if (robotDistance > 200 || getEnergy() < 15) {
-			fire(1);
-		} else if (robotDistance > 50) {
-			fire(2);
-		} else {
-			fire(3);
-		}
-	}
-
-	/**
-	 * onHitByBullet: What to do when you're hit by a bullet
-	 */
-	public void onHitByBullet(HitByBulletEvent e) {
-		// Replace the next line with any behavior you would like
-		back(10);
-	}
-	
-	/**
-	 * onHitWall: What to do when you hit a wall
-	 */
-	public void onHitWall(HitWallEvent e) {
-        // Ao atingir a parede, inverte a direção
-        turnLeft(180);
-    }
 	
 	public void onHitRobot(HitRobotEvent e) {
 		if (e.getBearing() > -10 && e.getBearing() < 10) {
 			fire(3);
 		}
 		if (e.isMyFault()) {
-			turnRight(10);
+			if (e.getBearing() >= 0) {
+			turnDirection = 1;
+		} else {
+			turnDirection = -1;
+		}
+		turnRight(e.getBearing());
+
+		// Determine a shot that won't kill the robot...
+		// We want to ram him instead for bonus points
+		if (e.getEnergy() > 16) {
+			fire(3);
+		} else if (e.getEnergy() > 10) {
+			fire(2);
+		} else if (e.getEnergy() > 4) {
+			fire(1);
+		} else if (e.getEnergy() > 2) {
+			fire(.5);
+		} else if (e.getEnergy() > .4) {
+			fire(.1);
+		}
+		ahead(40);
 		}
 	}
 }
